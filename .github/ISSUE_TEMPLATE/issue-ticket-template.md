@@ -1,5 +1,8 @@
 ---
+name: Issue Ticket Template
+about: Template for issue tickets
 title: ''
+
 ---
 
 # User Story
