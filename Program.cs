@@ -33,6 +33,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// GET Products
 app.MapGet("/api/products", (BangazonBEDbContext db) =>
 {
     return db.Products.ToList();
