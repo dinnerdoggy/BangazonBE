@@ -39,4 +39,40 @@ app.MapGet("/api/products", (BangazonBEDbContext db) =>
     return db.Products.ToList();
 });
 
+// GET Types
+app.MapGet("/api/producttypes", (BangazonBEDbContext db) =>
+{
+    return db.ProductTypes.ToList();
+});
+
+// GET ProductOrders
+app.MapGet("/api/productorders", (BangazonBEDbContext db) =>
+{
+    return db.ProductOrders.ToList();
+});
+
+// GET Orders
+app.MapGet("/api/orders", (BangazonBEDbContext db) =>
+{
+    return db.Orders.ToList();
+});
+
+// GET Types
+app.MapGet("/api/customers", (BangazonBEDbContext db) =>
+{
+    return db.Customers.ToList();
+});
+
+// GET Users
+app.MapGet("/api/users", (BangazonBEDbContext db) =>
+{
+    return db.Users.ToList();
+});
+
+// GET Sellers
+app.MapGet("/api/sellers", (BangazonBEDbContext db) =>
+{
+    return db.Sellers.ToList();
+});
+
 app.Run();
