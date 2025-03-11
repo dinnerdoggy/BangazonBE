@@ -92,8 +92,23 @@ app.MapPost("/api/register", async (BangazonBEDbContext db, RegisterUserDto data
 // GET Products
 app.MapGet("/api/products", (BangazonBEDbContext db) =>
 {
-    return db.Products.ToList();
+    var products = db.Products
+        .Include(p => p.ProductType) // Ensure this relationship exists
+        .Select(p => new 
+        {
+            p.Id,
+            p.ProductName,
+            p.ProductImage,
+            p.Description,
+            p.Price,
+            p.ProductTypeId,
+            Type = p.ProductType.TypeName // Join on ProductType to get the name
+        })
+        .ToList();
+
+    return Results.Ok(products);
 });
+
 
 // GET Product by ID
 app.MapGet("/api/products/{id}", (BangazonBEDbContext db, int id) =>
