@@ -144,4 +144,64 @@ app.MapGet("/api/sellers", (BangazonBEDbContext db) =>
     return db.Sellers.ToList();
 });
 
+app.MapPost("/api/orders/add", async (BangazonBEDbContext db, ProductOrderDto data) =>
+{
+    // Get or create an active order
+    var order = await db.Orders
+        .Include(o => o.ProductOrders)
+        .FirstOrDefaultAsync(o => o.CustomerId == data.CustomerId && o.Pending);
+
+    if (order == null)
+    {
+        order = new Order { CustomerId = data.CustomerId, Pending = true, Total = 0 };
+        db.Orders.Add(order);
+        await db.SaveChangesAsync();
+    }
+
+    // Check if product is already in order
+    var ProductOrders = order.ProductOrders.FirstOrDefault(op => op.ProductId == data.ProductId);
+    if (ProductOrders != null)
+    {
+        ProductOrders.Quantity += 1;  // Increase quantity if already in cart
+    }
+    else
+    {
+        db.ProductOrders.Add(new ProductOrders { OrderId = order.Id, ProductId = data.ProductId, Quantity = 1 });
+    }
+
+    // Update total
+    var product = await db.Products.FindAsync(data.ProductId);
+    order.Total += product.Price;
+
+    await db.SaveChangesAsync();
+    return Results.Ok(order);
+});
+
+app.MapGet("/api/orders/{customerId}", async (BangazonBEDbContext db, int customerId) =>
+{
+    // Find the active (pending) order for the customer
+    var order = await db.Orders
+        .Include(o => o.ProductOrders) // Ensure product orders are included
+        .ThenInclude(po => po.Product) // Include product details
+        .FirstOrDefaultAsync(o => o.CustomerId == customerId && o.Pending);
+
+    if (order == null)
+    {
+        return Results.NotFound(new { message = "No active cart found for this customer." });
+    }
+
+    // Transform the data to return only relevant details
+    var cartItems = order.ProductOrders.Select(po => new
+    {
+        po.Product.Id,
+        po.Product.ProductName,
+        po.Quantity,
+        po.Product.Price
+    }).ToList();
+
+    return Results.Ok(cartItems);
+});
+
+
+
 app.Run();
